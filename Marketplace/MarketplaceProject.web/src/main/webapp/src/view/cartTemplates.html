@@ -1,0 +1,9 @@
+<script type="text/template" id="cart">
+    <div class="form-group">
+    <form role="form" id="<%= componentId %>-cartForm">
+    <% if(cart.id) {%>
+    <input type="hidden" name="id" value="<%= cart.id %>"/>
+    <% }%>
+    </form>
+    </div>
+</script> 

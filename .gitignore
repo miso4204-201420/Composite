@@ -41,3 +41,11 @@ Icon
 Network Trash Folder
 Temporary Items
 .apdisk
+
+#Mr Developer
+.mr.developer.cfg
+/Marketplace/crudmaker.web/target/
+/Marketplace/MarketplaceProject.api/target/
+/Marketplace/MarketplaceProject.logic/target/
+/Marketplace/MarketplaceProject.web/target/
+/Marketplace/MarketplaceProject.mock/target/

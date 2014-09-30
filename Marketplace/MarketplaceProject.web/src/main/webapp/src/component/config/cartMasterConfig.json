@@ -1,0 +1,11 @@
+{
+    "displayName" : "Cart",
+    "name" : "cart",
+    "templateName" : "cart",
+    "url" : "cart.html",
+    "server": "localhost:8080",
+    "server": "localhost:8080",
+    "context": "/MarketplaceProject.web/webresources/CartMaster",
+    
+    "el" : "#main"
+}
