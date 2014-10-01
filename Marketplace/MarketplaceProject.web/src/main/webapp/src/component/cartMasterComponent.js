@@ -84,12 +84,8 @@ define(['controller/selectionController', 'model/cacheModel', 'model/cartMasterM
             App.Model.CartMasterModel.prototype.urlRoot = this.configuration.context;
             var options = {
                 success: function() {
-					self.itemComponent = new itemComponent();
-                    self.itemModels = App.Utils.convertToModel(App.Utils.createCacheModel(App.Model.ItemModel), self.model.get('listitem'));
-                    self.itemComponent.initialize({
-                        modelClass: App.Utils.createCacheModel(App.Model.ItemModel),
-                        listModelClass: App.Utils.createCacheList(App.Model.ItemModel, App.Model.ItemList, self.itemModels)
-                    });
+                    self.itemComponent = new itemComponent();
+                    self.itemComponent.initialize({cache: {data: self.model.get('listitem')}});
                     self.itemComponent.listComponent.setData({pagination: false});
                     self.itemComponent.render(self.tabs.getTabHtmlId('item'));
                     Backbone.on(self.itemComponent.componentId + '-post-item-create', function(params) {

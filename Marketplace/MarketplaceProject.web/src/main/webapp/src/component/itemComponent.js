@@ -36,6 +36,17 @@ define(['component/_CRUDComponent', 'model/itemModel', 'controller/itemControlle
         postInit: function(){
         	this.listComponent.addColumn('productId','Product Id');
                 this.listComponent.addColumn('quantity','Quantity');
+        },
+        setCache: function (params) {
+                this.cache = params;
+                if (params) {
+                    var itemModels = App.Utils.convertToModel(App.Utils.createCacheModel(App.Model.ItemModel), params.data);
+                    this.model = App.Utils.createCacheModel(App.Model.ItemModel);
+                    this.listModel = App.Utils.createCacheList(App.Model.ItemModel, App.Model.ItemList, itemModels);
+                }else {
+                    this.model = App.Model.ItemModel;
+                    this.listModel = App.Model.ItemList;
+                }
         }
     });
     return App.Component.ItemComponent;

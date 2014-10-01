@@ -8,20 +8,15 @@ define(['controller/messageController','component/toolbarComponent','component/l
         initialize: function(options) {
             var self = this;
             this.componentId = App.Utils.randomInteger();
+            this.pageSize = 25;
             this.configuration = App.Utils.loadComponentConfiguration(this.name);
-            if (options) {
-                if (options.modelClass) {
-                    this.model = options.modelClass;
-                }
-                if (options.listModelClass) {
-                    this.listModel = options.listModelClass;
-                }
-            }
             App.Utils.loadTemplate(this.name);
             this.model.prototype.urlRoot = this.configuration.context;
             this.listModel.prototype.url = this.configuration.context;
             this.el = this.configuration.el;
-	    this.pageSize = 10;
+            if (options && options.cache) {
+                this.setCache(options.cache);
+            }
             this.componentController = new this.controller({modelClass: this.model, listModelClass: this.listModel, componentId: this.componentId, pageSize: this.pageSize});
             this.toolbarComponent = new App.Component.ToolbarComponent({componentId: this.componentId, name: this.name});
 	    this.listComponent = new App.Component.ListComponent({componentId: this.componentId, name: this.name});
