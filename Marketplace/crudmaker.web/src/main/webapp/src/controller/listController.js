@@ -84,6 +84,22 @@ define(['model/listModel'], function() {
 		}
 	    }
 	},
+        showAction: function(name) {
+	    for (i in this.model.get('actions')) {
+                if (name == this.model.get('actions')[i].get('name')) {
+                    this.model.get('actions')[i].set('show', true);
+                    this.render();
+                }
+            }
+	},
+	hideAction: function(name) {
+	    for (i in this.model.get('actions')) {
+                if (name == this.model.get('actions')[i].get('name')) {
+                    this.model.get('actions')[i].set('show', false);
+                    this.render();
+                }
+            }
+	},
 	addColumn: function(columnName, displayName, formula) {
 	    this.model.get('columns').push(
 		    {name: columnName,
@@ -105,7 +121,18 @@ define(['model/listModel'], function() {
 	},
 	cleanSelected: function() {
 	    this.model.set('selectedItems', []);
-	}
+	},
+        display: function(flag){
+            if (typeof(flag)=== "boolean") {
+                if(flag){
+                    this.$el.show();
+                }else {
+                    this.$el.hide();
+                }
+            }else {
+                console.log("parameter value must be boolean type");
+            }
+        }
     });
 
     return App.Controller.ListController;

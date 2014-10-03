@@ -21,15 +21,14 @@ define(['component/productComponent', 'component/cartMasterComponent'], function
             this.setupCartMasterComponent();
         },
         render: function() {
-            this.productComponent.render("main1");
+            this.productComponent.renderList();
             this.cartMasterComponent.itemComponent.render();
         },
         setupProductComponent: function() {
             this.productComponent = new cartCp({componentId: this.componentId, el: "#main1"});
             this.productComponent.initialize();
             this.productComponent.listComponent.setSelection(true);
-            this.productComponent.listComponent.removeAction("delete");
-            this.productComponent.listComponent.removeAction("edit");
+            this.productComponent.setReadOnly(true);
             this.productComponent.listComponent.addAction({
                 name: 'addToCart',
                 icon: '',
@@ -39,29 +38,22 @@ define(['component/productComponent', 'component/cartMasterComponent'], function
             this.addItem,
             this);
             
-            this.productComponent.toolbarComponent.removeButton('create');
-            this.productComponent.toolbarComponent.removeButton('save');
-            this.productComponent.toolbarComponent.removeButton('print');
-            this.productComponent.toolbarComponent.removeButton('search');
-            
             this.productComponent.toolbarComponent.addButton({
                 name: 'buy',
                 icon: 'glyphicon-shopping-cart',
                 displayName: 'Add to cart',
-                show: true
+                show: true,
+                menu: 'utils'
             },
             this.addToCart,
             this);
+            
+            this.productComponent.render("main1");
         },
         setupCartMasterComponent: function() {
             this.cartMasterComponent = new cartMasterCp({componentId: this.componentId});
             this.cartMasterComponent.initialize();
-            this.cartMasterComponent.masterComponent.toolbarComponent.removeButton("create");
-            this.cartMasterComponent.masterComponent.toolbarComponent.removeButton("cancel");
-            this.cartMasterComponent.masterComponent.toolbarComponent.removeButton("save");
-            this.cartMasterComponent.masterComponent.toolbarComponent.removeButton("refresh");
-            this.cartMasterComponent.masterComponent.toolbarComponent.removeButton("print");
-            this.cartMasterComponent.masterComponent.toolbarComponent.removeButton("search");
+            this.cartMasterComponent.masterComponent.clearToolbar();
             this.cartMasterComponent.masterComponent.toolbarComponent.addButton({
                 name: 'checkout',
                 icon: 'glyphicon-shopping-cart',
@@ -77,11 +69,9 @@ define(['component/productComponent', 'component/cartMasterComponent'], function
             },this.cartMasterComponent.masterComponent);
             this.cartMasterComponent.masterComponent.render();
             this.cartMasterComponent.masterComponent.create();
-            this.cartMasterComponent.masterComponent.toolbarComponent.render();
             
-            this.cartMasterComponent.itemComponent.toolbarComponent.toolbarController.template = function(){};
-            this.cartMasterComponent.itemComponent.listComponent.removeAction("edit");
-            //this.cartMasterComponent.itemComponent.listComponent.removeAction("delete");
+            this.cartMasterComponent.itemComponent.displayToolbar(false);
+            this.cartMasterComponent.itemComponent.disableEdit();
             this.cartMasterComponent.itemComponent.render("items");
             
         },

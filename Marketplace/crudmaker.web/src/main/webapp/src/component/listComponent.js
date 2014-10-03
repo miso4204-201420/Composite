@@ -27,6 +27,12 @@ define(['controller/listController'], function(){
         removeAction: function(name) {
             this.listController.removeAction(name);
         },
+        showAction: function(name) {
+            this.listController.showAction(name);
+        },
+	hideAction: function(name) {
+            this.listController.hideAction(name);
+        },
 	setTemplate: function(templateName){
 	    this.listController.setTemplate(templateName);
 	},
@@ -47,7 +53,10 @@ define(['controller/listController'], function(){
 	},
 	cleanSelected: function(){
 	    this.listController.cleanSelected();
-	}
+	},
+        display: function(flag){
+            this.listController.display(flag);
+        }
     });
     
     return App.Component.ListComponent;

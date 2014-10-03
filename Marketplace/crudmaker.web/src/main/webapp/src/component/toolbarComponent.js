@@ -43,7 +43,10 @@ define(['controller/toolbarController'], function(){
 	},
 	render: function(){
 	    this.toolbarController.render();
-	}
+	},
+        display: function(flag){
+            this.toolbarController.display(flag);
+        }
     });
     
     return App.Component.ToolbarComponent;

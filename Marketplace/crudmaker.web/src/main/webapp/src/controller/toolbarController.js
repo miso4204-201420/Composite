@@ -6,7 +6,7 @@ define(['model/toolbarModel'], function() {
 	    this.listenTo(this.model, 'change', this.render);
 	},
 	render: function() {
-	    this.$el.html(this.template(this.model.toJSON()));
+            this.$el.html(this.template(this.model.toJSON()));
 	    return this;
 	},
 	setTemplate: function(templateName) {
@@ -84,7 +84,18 @@ define(['model/toolbarModel'], function() {
 		    }
 		}
 	    }
-	}
+	},
+        display: function(flag){
+            if (typeof(flag)=== "boolean") {
+                if(flag){
+                    this.$el.show();
+                }else {
+                    this.$el.hide();
+                }
+            }else {
+                console.log("parameter value must be boolean type");
+            }
+        }
     });
     return App.Controller.ToolbarController;
 });

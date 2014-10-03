@@ -9,13 +9,15 @@ define(['controller/messageController','component/toolbarComponent','component/l
             var self = this;
             this.componentId = App.Utils.randomInteger();
             this.pageSize = 25;
+            this.showToolbar = true;
+            this.showList = true;
             this.configuration = App.Utils.loadComponentConfiguration(this.name);
             App.Utils.loadTemplate(this.name);
             this.model.prototype.urlRoot = this.configuration.context;
             this.listModel.prototype.url = this.configuration.context;
             this.el = this.configuration.el;
             if (options && options.cache) {
-                this.setCache(options.cache);
+                this.configCache(options.cache);
             }
             this.componentController = new this.controller({modelClass: this.model, listModelClass: this.listModel, componentId: this.componentId, pageSize: this.pageSize});
             this.toolbarComponent = new App.Component.ToolbarComponent({componentId: this.componentId, name: this.name});
@@ -68,13 +70,21 @@ define(['controller/messageController','component/toolbarComponent','component/l
                 this.componentController.setElement('#' + this.contentDomId);
             }
             if (this.componentController._loadRequiredComponentsData) {
-                this.componentController._loadRequiredComponentsData(function() {
-                    self.toolbarComponent.toolbarController.render();
-                    self.componentController.list(null, self.list, self);
+                this.componentController._loadRequiredComponentsData(function(){
+                    if (self.showToolbar) {
+                        self.toolbarComponent.toolbarController.render();
+                    }
+                    if (self.showList) {
+                        self.componentController.list(null, self.list, self);
+                    }
                 });
             } else {
-                self.toolbarComponent.toolbarController.render();
-                self.componentController.list(null, this.list, this);
+                if (this.showToolbar) {
+                    this.toolbarComponent.toolbarController.render();
+                }
+                if (this.showList) {
+                    this.componentController.list(null, this.list, this);
+                }
             }
         },
 	create: function(){
@@ -193,7 +203,7 @@ define(['controller/messageController','component/toolbarComponent','component/l
 	    this.listComponent.addAction({
 		name: 'edit', 
 		icon: '', 
-		displayName: 'Editar', 
+		displayName: 'Edit', 
 		show: true
 	    },
 	    this.edit,
@@ -202,16 +212,74 @@ define(['controller/messageController','component/toolbarComponent','component/l
 	    this.listComponent.addAction({
 		name: 'delete', 
 		icon: '', 
-		displayName: 'Borrar', 
+		displayName: 'Delete', 
 		show: true
 	    },
 	    this.delete,
 	    this);
 	},
-    setPageSize: function(pageSize){
-        this.pageSize=pageSize;
-        this.componentController.setPageSize(pageSize);
-    }
+        setPageSize: function (pageSize) {
+            this.pageSize = pageSize;
+            this.componentController.setPageSize(pageSize);
+        },
+        displayToolbar: function (flag) {
+            if (typeof(flag) === "boolean") {
+                this.showToolbar = flag;
+                this.toolbarComponent.display(flag);
+            }else {
+                console.log("parameter value must be boolean type");
+            }
+        },
+        displayList: function(flag){
+            if (typeof(flag) === "boolean") {
+                this.showList = flag;
+                this.listComponent.display(flag);
+            } else {
+                console.log("parameter value must be boolean type");
+            }
+        },
+        clearToolbar: function(){
+            this.toolbarComponent.removeButton("create");
+            this.toolbarComponent.removeButton("cancel");
+            this.toolbarComponent.removeButton("save");
+            this.toolbarComponent.removeButton("refresh");
+            this.toolbarComponent.removeButton("print");
+            this.toolbarComponent.removeButton("search");
+        },
+        clearListActions: function(){
+            this.listComponent.removeAction("edit");
+            this.listComponent.removeAction("delete");
+        },
+        setReadOnly: function(flag){
+            if (typeof (flag) === 'boolean') {
+                if (flag) {
+                    this.listComponent.hideAction("edit");
+                    this.listComponent.hideAction("delete");
+
+                    this.toolbarComponent.hideButton("create");
+                    this.toolbarComponent.hideButton("cancel");
+                    this.toolbarComponent.hideButton("save");
+                } else {
+                    this.listComponent.showAction("edit");
+                    this.listComponent.showAction("delete");
+
+                    this.toolbarComponent.showButton("create");
+                    this.toolbarComponent.showButton("cancel");
+                    this.toolbarComponent.showButton("save");
+                }
+            } else {
+                console.log("parameter value must be boolean type")
+            }
+        },
+        disableEdit: function(){
+            this.listComponent.removeAction("edit");
+        },
+        disableDelete: function(){
+            this.listComponent.removeAction("edit");
+        },
+        renderList: function(){
+            this.listComponent.render();
+        }
     });
     return App.Component._CRUDComponent;
 });

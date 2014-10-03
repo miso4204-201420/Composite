@@ -37,8 +37,9 @@
 			<% } %>
 			<td>
 			    <% _.each(actions, function(action){ %>
+                                <% if(action.get('show')){ %>
 				<a class="btn btn-xs" onclick="Backbone.trigger('<%= componentId %>-<%= name %>-<%= action.get('name') %>', {id: <%= item.id %> }); return false" ><%= action.get('displayName') %></a>
-			    <% }); %>
+			    <% }}); %>
 			</td>
 		    </tr>
 		    <% }); %>
