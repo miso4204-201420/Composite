@@ -27,9 +27,9 @@ define(['component/productComponent', 'component/cartMasterComponent'], function
         setupProductComponent: function() {
             this.productComponent = new cartCp({componentId: this.componentId, el: "#main1"});
             this.productComponent.initialize();
-            this.productComponent.listComponent.setSelection(true);
+            this.productComponent.setListSelection(true);
             this.productComponent.setReadOnly(true);
-            this.productComponent.listComponent.addAction({
+            this.productComponent.addListAction({
                 name: 'addToCart',
                 icon: '',
                 displayName: 'Add to cart',
@@ -38,7 +38,7 @@ define(['component/productComponent', 'component/cartMasterComponent'], function
             this.addItem,
             this);
             
-            this.productComponent.toolbarComponent.addButton({
+            this.productComponent.addToolbarButton({
                 name: 'buy',
                 icon: 'glyphicon-shopping-cart',
                 displayName: 'Add to cart',
@@ -84,7 +84,7 @@ define(['component/productComponent', 'component/cartMasterComponent'], function
                 }
             }
             this.cartMasterComponent.addItems(idList);
-            this.productComponent.listComponent.cleanSelected();
+            this.productComponent.clearListSelected();
             this.render();
             
         },
@@ -92,9 +92,8 @@ define(['component/productComponent', 'component/cartMasterComponent'], function
             this.cartMasterComponent.masterComponent.save();
         },
         addItem: function(params){
-            var item = this.productComponent.componentController.productModelList.get(params.id);
-            this.cartMasterComponent.addItems([{productId: item.id}]);
-            this.productComponent.listComponent.cleanSelected();
+            this.cartMasterComponent.addItems([{productId: params.id}]);
+            this.productComponent.clearListSelected();
             this.render();
         }
     });

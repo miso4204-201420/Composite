@@ -279,7 +279,23 @@ define(['controller/messageController','component/toolbarComponent','component/l
         },
         renderList: function(){
             this.listComponent.render();
-        }
+        },
+		addListAction: function(button,callback,context){
+			this.listComponent.addAction(button,callback,context);
+		},
+		addToolbarButton: function(button,callback,context){
+			this.toolbarComponent.addButton(button,callback,context);
+		},
+		setListSelection: function(flag){
+			if (typeof(flag)==="boolean") {
+				this.listComponent.setSelection(flag);
+			}else {
+				console.log("Parameter value must be boolean type");
+			}
+		},
+		clearListSelected: function(){
+			this.listComponent.cleanSelected();
+		}
     });
     return App.Component._CRUDComponent;
 });
