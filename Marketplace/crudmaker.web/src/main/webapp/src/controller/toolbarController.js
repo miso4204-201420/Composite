@@ -88,7 +88,7 @@ define(['model/toolbarModel'], function () {
 				for (j in this.model.get('menus')[i].get('buttons')) {
 					if (name == this.model.get('menus')[i].get('buttons')[j].get('name')) {
 						this.model.get('menus')[i].get('buttons')[j].set('show', false);
-						this.renderOnChange && this.render();
+						this.render();
 					}
 				}
 			}
