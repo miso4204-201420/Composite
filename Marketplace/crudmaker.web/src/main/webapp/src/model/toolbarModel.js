@@ -3,6 +3,7 @@ define(['model/menuModel'], function() {
 	    defaults : {
 		    componentId : '',
 		    name : '-',
+			show: true,
 		    title : '',
 		    icon : 'globe',
 		    showTitle : true,

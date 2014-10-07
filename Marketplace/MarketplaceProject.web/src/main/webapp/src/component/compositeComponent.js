@@ -21,15 +21,15 @@ define(['component/productComponent', 'component/cartMasterComponent'], function
             this.setupCartMasterComponent();
         },
         render: function() {
-            this.productComponent.renderList();
+            this.productComponent.renderRecords();
             this.cartMasterComponent.itemComponent.render();
         },
         setupProductComponent: function() {
             this.productComponent = new cartCp({componentId: this.componentId, el: "#main1"});
             this.productComponent.initialize();
-            this.productComponent.setListSelection(true);
+            this.productComponent.enableMultipleSelection(true);
             this.productComponent.setReadOnly(true);
-            this.productComponent.addListAction({
+            this.productComponent.addRecordAction({
                 name: 'addToCart',
                 icon: '',
                 displayName: 'Add to cart',
@@ -38,7 +38,7 @@ define(['component/productComponent', 'component/cartMasterComponent'], function
             this.addItem,
             this);
             
-            this.productComponent.addToolbarButton({
+            this.productComponent.addGlobalAction({
                 name: 'buy',
                 icon: 'glyphicon-shopping-cart',
                 displayName: 'Add to cart',
@@ -53,8 +53,8 @@ define(['component/productComponent', 'component/cartMasterComponent'], function
         setupCartMasterComponent: function() {
             this.cartMasterComponent = new cartMasterCp({componentId: this.componentId});
             this.cartMasterComponent.initialize();
-            this.cartMasterComponent.masterComponent.clearToolbar();
-            this.cartMasterComponent.masterComponent.toolbarComponent.addButton({
+            this.cartMasterComponent.masterComponent.clearGlobalActions();
+            this.cartMasterComponent.masterComponent.addGlobalAction({
                 name: 'checkout',
                 icon: 'glyphicon-shopping-cart',
                 displayName: 'Checkout',
@@ -70,13 +70,13 @@ define(['component/productComponent', 'component/cartMasterComponent'], function
             this.cartMasterComponent.masterComponent.render();
             this.cartMasterComponent.masterComponent.create();
             
-            this.cartMasterComponent.itemComponent.displayToolbar(false);
+            this.cartMasterComponent.itemComponent.setGlobalActionsVisible(false);
             this.cartMasterComponent.itemComponent.disableEdit();
             this.cartMasterComponent.itemComponent.render("items");
             
         },
         addToCart: function() {
-            var items = this.productComponent.listComponent.getSelectedItems();
+            var items = this.productComponent.getSelectedRecords();
             var idList = [];
             for (var property in items) {
                 if (items.hasOwnProperty(property)) {
@@ -84,7 +84,7 @@ define(['component/productComponent', 'component/cartMasterComponent'], function
                 }
             }
             this.cartMasterComponent.addItems(idList);
-            this.productComponent.clearListSelected();
+            this.productComponent.clearSelectedRecords();
             this.render();
             
         },
@@ -93,7 +93,7 @@ define(['component/productComponent', 'component/cartMasterComponent'], function
         },
         addItem: function(params){
             this.cartMasterComponent.addItems([{productId: params.id}]);
-            this.productComponent.clearListSelected();
+            this.productComponent.clearSelectedRecords();
             this.render();
         }
     });

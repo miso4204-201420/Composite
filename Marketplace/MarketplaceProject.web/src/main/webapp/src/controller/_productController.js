@@ -175,7 +175,10 @@ define(['model/productModel'], function(productModel) {
 		},
         setPageSize: function(pageSize){
             this.pageSize = pageSize;
-        }
+        },
+		getRecords: function(){
+			return this.productModelList;
+		}
     });
     return App.Controller._ProductController;
 });

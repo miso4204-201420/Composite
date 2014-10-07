@@ -43,6 +43,7 @@ define(['model/itemModel'], function(itemModel) {
 		    if(options.pageSize){
 		    	this.pageSize = options.pageSize;
 		    }
+			this.itemModelList = new this.listModelClass();
             var self = this;
             if(self.postInit){
             	self.postInit(options);
@@ -192,7 +193,19 @@ define(['model/itemModel'], function(itemModel) {
 		},
         setPageSize: function(pageSize){
             this.pageSize = pageSize;
-        }
+        },
+		getRecords: function(){
+			return this.itemModelList;
+		},
+		addRecords: function(objArray){
+			for (var idx in objArray) {
+				var newModel = this.itemModelList.push(objArray[idx]);
+				if(newModel.setCacheList){
+					newModel.setCacheList(this.itemModelList);
+					newModel.save({},{});
+				}
+			}
+		}
     });
     return App.Controller._ItemController;
 });

@@ -43,7 +43,7 @@ define(['component/_CRUDComponent', 'model/itemModel', 'controller/itemControlle
              if (params && params.mode === "memory") {
                 var itemModels = App.Utils.convertToModel(App.Utils.createCacheModel(App.Model.ItemModel), params.data);
                 this.model = App.Utils.createCacheModel(App.Model.ItemModel);
-                this.listModel = App.Utils.createCacheList(App.Model.ItemModel, App.Model.ItemList, itemModels);
+                this.listModel = App.Utils.createCacheList(this.model, App.Model.ItemList, itemModels);
             } else {
                 this.model = App.Model.ItemModel;
                 this.listModel = App.Model.ItemList;

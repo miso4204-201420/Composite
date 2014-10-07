@@ -175,7 +175,10 @@ define(['model/cartModel'], function(cartModel) {
 		},
         setPageSize: function(pageSize){
             this.pageSize = pageSize;
-        }
+        },
+		getRecords: function(){
+			return this.cartModelList;
+		}
     });
     return App.Controller._CartController;
 });

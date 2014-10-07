@@ -62,13 +62,38 @@ define(['App', 'controller/messageController'], function(App, Messages) {
             return modelClass.extend(App.Model.CacheModel);
         },
         createCacheList: function(modelClass, listClass, initialList) {
-            var cacheModel = this.createCacheModel(modelClass);
+            //var cacheModel = this.createCacheModel(modelClass);
             var listModel = App.Model.CacheListModel;
-            listModel.model = cacheModel;
+            listModel.model = modelClass;
             listModel.deletedModels = [];
             listModel.cacheModels = initialList;
             return listClass.extend(listModel);
         },
+		divideCacheList: function (component,childComponent) {
+			var name = childComponent.name;
+			var models = childComponent.getRecords();
+			component.model.set('list' + name, []);
+			component.model.set('create' + name, []);
+			component.model.set('update' + name, []);
+			component.model.set('delete' + name, []);
+			for (var i = 0; i < models.models.length; i++) {
+				var m = models.models[i];
+				var modelCopy = m.clone();
+				if (m.isCreated()) {
+					//set the id to null
+					modelCopy.unset('id');
+					component.model.get('create'+name).push(modelCopy.toJSON());
+					//modificado para composite
+					m.created = false;
+				} else if (m.isUpdated()) {
+					component.model.get('update'+name).push(modelCopy.toJSON());
+				}
+			}
+			for (var i = 0; i < models.deletedModels.length; i++) {
+				var m = models.deletedModels[i];
+				component.model.get('delete' + name).push(m.toJSON());
+			}
+		},
         getComponentList: function(componentName, callBack, aliasName) {
             var self = this;
             if (!this.cache[componentName]) {

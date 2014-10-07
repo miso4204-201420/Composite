@@ -9,6 +9,7 @@ define([], function() {
 		defaults : {
 			componentId : '',
 			name: '',
+			show: true,
 			select: false,
 			pagination: true,
 			page: '',
