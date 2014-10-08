@@ -43,8 +43,8 @@ define(['model/itemModel'], function(itemModel) {
 		    if(options.pageSize){
 		    	this.pageSize = options.pageSize;
 		    }
-			this.itemModelList = new this.listModelClass();
-            var self = this;
+			this.currentList = new this.listModelClass();
+			var self = this;
             if(self.postInit){
             	self.postInit(options);
             }
@@ -54,7 +54,7 @@ define(['model/itemModel'], function(itemModel) {
                 Backbone.trigger(this.componentId + '-' + 'instead-item-create', {view: this});
             } else {
                 Backbone.trigger(this.componentId + '-' + 'pre-item-create', {view: this});
-                this.currentItemModel = new this.modelClass({componentId: this.componentId});
+                this.currentModel = new this.modelClass({componentId: this.componentId});
                 this._renderEdit();
                 Backbone.trigger(this.componentId + '-' + 'post-item-create', {view: this});
             }
@@ -68,16 +68,16 @@ define(['model/itemModel'], function(itemModel) {
             } else {
                 Backbone.trigger(this.componentId + '-' + 'pre-item-list', {view: this, data: data});
                 var self = this;
-				if(!this.itemModelList){
-	                this.itemModelList = new this.listModelClass();
+				if(!this.currentList){
+	                this.currentList = new this.listModelClass();
 				}
 				if (this.pageSize) {
-					this.itemModelList.setPageSize(this.pageSize);
+					this.currentList.setPageSize(this.pageSize);
 				}
-                this.itemModelList.fetch({
+                this.currentList.fetch({
                     data: data,
                     success: function(resp) {
-                        callback.call(context,{data: self.itemModelList, page: resp.state.currentPage, pages: resp.state.totalPages, totalRecords: resp.state.totalRecords});
+                        callback.call(context,{data: self.currentList, page: resp.state.currentPage, pages: resp.state.totalPages, totalRecords: resp.state.totalRecords});
                         Backbone.trigger(self.componentId + '-' + 'post-item-list', {view: self});
                     },
                     error: function(mode, error) {
@@ -93,18 +93,18 @@ define(['model/itemModel'], function(itemModel) {
                 Backbone.trigger(this.componentId + '-' + 'instead-item-edit', {view: this, id: id, data: data});
             } else {
                 Backbone.trigger(this.componentId + '-' + 'pre-item-edit', {view: this, id: id, data: data});
-                if (this.itemModelList) {
-                    this.currentItemModel = this.itemModelList.get(id);
-                    this.currentItemModel.set('componentId',this.componentId); 
+                if (this.currentList) {
+                    this.currentModel = this.currentList.get(id);
+                    this.currentModel.set('componentId',this.componentId); 
                     this._renderEdit();
                     Backbone.trigger(this.componentId + '-' + 'post-item-edit', {view: this, id: id, data: data});
                 } else {
                     var self = this;
-                    this.currentItemModel = new this.modelClass({id: id});
-                    this.currentItemModel.fetch({
+                    this.currentModel = new this.modelClass({id: id});
+                    this.currentModel.fetch({
                         data: data,
                         success: function() {
-                            self.currentItemModel.set('componentId',self.componentId); 
+                            self.currentModel.set('componentId',self.componentId); 
                             self._renderEdit();
                             Backbone.trigger(self.componentId + '-' + 'post-item-edit', {view: this, id: id, data: data});
                         },
@@ -124,7 +124,7 @@ define(['model/itemModel'], function(itemModel) {
                 Backbone.trigger(this.componentId + '-' + 'pre-item-delete', {view: this, id: id});
                 var deleteModel = new this.modelClass({id: id});
                 if(deleteModel.setCacheList){
-                    deleteModel.setCacheList(this.itemModelList);
+                    deleteModel.setCacheList(this.currentList);
                 }
                 deleteModel.destroy({
                     success: function() {
@@ -158,11 +158,11 @@ define(['model/itemModel'], function(itemModel) {
                 Backbone.trigger(this.componentId + '-' + 'instead-item-save', {view: this, model : model});
             } else {
                 Backbone.trigger(this.componentId + '-' + 'pre-item-save', {view: this, model : model});
-                this.currentItemModel.set(model);
-                this.currentItemModel.save({},
+                this.currentModel.set(model);
+                this.currentModel.save({},
                         {
                             success: function(model) {
-                                Backbone.trigger(self.componentId + '-' + 'post-item-save', {model: self.currentItemModel});
+                                Backbone.trigger(self.componentId + '-' + 'post-item-save', {model: self.currentModel});
                             },
                             error: function(error) {
                                 Backbone.trigger(self.componentId + '-' + 'error', {event: 'item-save', view: self, error: error});
@@ -173,14 +173,14 @@ define(['model/itemModel'], function(itemModel) {
         _renderList: function() {
             var self = this;
             this.$el.slideUp("fast", function() {
-                self.$el.html(self.listTemplate({items: self.itemModelList.models, componentId: self.componentId, showEdit : self.showEdit , showDelete : self.showDelete}));
+                self.$el.html(self.listTemplate({items: self.currentList.models, componentId: self.componentId, showEdit : self.showEdit , showDelete : self.showDelete}));
                 self.$el.slideDown("fast");
             });
         },
         _renderEdit: function() {
             var self = this;
             this.$el.slideUp("fast", function() {
-                self.$el.html(self.editTemplate({item: self.currentItemModel, componentId: self.componentId , showEdit : self.showEdit , showDelete : self.showDelete
+                self.$el.html(self.editTemplate({item: self.currentModel, componentId: self.componentId , showEdit : self.showEdit , showDelete : self.showDelete
  
 				    ,product: self.productComponent
  
@@ -189,22 +189,64 @@ define(['model/itemModel'], function(itemModel) {
             });
         },
 		setPage: function(page){
-		    this.itemModelList.state.currentPage = page;
+		    this.currentList.state.currentPage = page;
 		},
         setPageSize: function(pageSize){
             this.pageSize = pageSize;
         },
 		getRecords: function(){
-			return this.itemModelList;
+			return this.currentList.toJSON();
 		},
-		addRecords: function(objArray){
-			for (var idx in objArray) {
-				var newModel = this.itemModelList.push(objArray[idx]);
-				if(newModel.setCacheList){
-					newModel.setCacheList(this.itemModelList);
-					newModel.save({},{});
+		setRecords: function(records){
+			this.currentList.reset(records);
+		},
+		getDeletedRecords: function(){
+			return this.currentList.deletedModels || [];
+		},
+		getCreatedRecords: function(){
+			var createdArray = [];
+			for (var idx in this.currentList.models) {
+				var model = this.currentList.models[idx];
+				if (model.isCreated && model.isCreated()) {
+					var jsonModel = model.toJSON();
+					delete jsonModel.id;
+					createdArray.push(jsonModel);
 				}
 			}
+			return createdArray;
+		},
+		getUpdatedRecords: function(){
+			var updatedArray = [];
+			for (var idx in this.currentList.models) {
+				var model = this.currentList.models[idx];
+				if (model.isUpdated && model.isUpdated()) {
+					updatedArray.push(model.toJSON());
+				}
+			}
+			return updatedArray;
+		},
+		addRecords: function(objArray){
+			if (Array.isArray(objArray)) {
+				for (var idx in objArray) {
+					var newModel = this.currentList.push(objArray[idx]);
+					if (newModel.setCacheList) {
+						newModel.setCacheList(this.currentList);
+						newModel.save({}, {});
+					}
+				}
+			}else{
+				if (typeof(objArray)==="object") {
+					var newModel = this.currentList.push(objArray);
+					if (newModel.setCacheList) {
+						newModel.setCacheList(this.currentList);
+						newModel.save({}, {});
+					}
+				}
+			}
+			
+		},
+		updateRecord: function(record){
+			this.currentList.add(record,{merge: true});
 		}
     });
     return App.Controller._ItemController;

@@ -13,13 +13,13 @@ define(['controller/messageController', 'component/toolbarComponent', 'component
 			this.showList = true;
 			this.configuration = App.Utils.loadComponentConfiguration(this.name);
 			App.Utils.loadTemplate(this.name);
-			this.model.prototype.urlRoot = this.configuration.context;
-			this.listModel.prototype.url = this.configuration.context;
+			this.modelClass.prototype.urlRoot = this.configuration.context;
+			this.listModelClass.prototype.url = this.configuration.context;
 			this.el = this.configuration.el;
 			if (options && options.cache) {
 				this.configCache(options.cache);
 			}
-			this.componentController = new this.controller({modelClass: this.model, listModelClass: this.listModel, componentId: this.componentId, pageSize: this.pageSize});
+			this.componentController = new this.controller({modelClass: this.modelClass, listModelClass: this.listModelClass, componentId: this.componentId, pageSize: this.pageSize});
 			this.toolbarComponent = new App.Component.ToolbarComponent({componentId: this.componentId, name: this.name});
 			this.listComponent = new App.Component.ListComponent({componentId: this.componentId, name: this.name});
 			Backbone.on(self.componentController.componentId + '-post-' + self.name + '-save', function (params) {
@@ -268,7 +268,7 @@ define(['controller/messageController', 'component/toolbarComponent', 'component
 					this.toolbarComponent.showButton("save");
 				}
 			} else {
-				console.log("parameter value must be boolean type")
+				console.log("parameter value must be boolean type");
 			}
 		},
 		disableEdit: function () {
@@ -305,20 +305,39 @@ define(['controller/messageController', 'component/toolbarComponent', 'component
 		getRecords: function(){
 			return this.componentController.getRecords();
 		},
+		getDeletedRecords: function(){
+			return this.componentController.getDeletedRecords();
+		},
+		getUpdatedRecords: function(){
+			return this.componentController.getUpdatedRecords();
+		},
+		getCreatedRecords: function(){
+			return this.componentController.getCreatedRecords();
+		},
 		getSelectedRecords: function(){
 			return this.listComponent.getSelectedItems();
 		},
+		updateRecord: function(record){
+			this.componentController.updateRecord(record);
+		},
 		updateUI: function (callback, context) {
 			var self = this;
-			if (callback) {
-				this.listComponent.updateUI(function () {
-					self.toolbarComponent.updateUI(callback,context);
-				},context);
-			}
+			this.listComponent.updateUI(function () {
+				self.toolbarComponent.updateUI(callback, context);
+			}, context);
 		},
 		addRecords: function(objArray){
 			this.componentController.addRecords(objArray);
-		}
+		},
+		setRecords: function(records){
+			this.componentController.setRecords(records);
+			this.listComponent.setData({data: this.componentController.currentList});
+			this.listComponent.render();
+		},
+        changeCacheMode: function(params){
+            this.configCache(params);
+            this.componentController = new this.controller({modelClass: this.model, listModelClass: this.listModel, componentId: this.componentId, pageSize: this.pageSize});
+        }
 	});
 	return App.Component._CRUDComponent;
 });

@@ -34,7 +34,13 @@ define(['controller/selectionController', 'model/cacheModel', 'model/cartMasterM
 					self.model.unset('id');
 				}
 
-				App.Utils.divideCacheList(self,self.itemComponent);
+				App.Utils.fillCacheList(
+					'item',
+					self.model,
+					self.itemComponent.getDeletedRecords(),
+					self.itemComponent.getUpdatedRecords(),
+					self.itemComponent.getCreatedRecords()
+				);
 				
 				self.model.save({}, {
 					success: function () {
@@ -59,7 +65,7 @@ define(['controller/selectionController', 'model/cacheModel', 'model/cartMasterM
 			// this.itemComponent.setPageSize();
 			// this.itemComponent.listComponent.setData({pagination: false});
 			Backbone.on(this.itemComponent.componentId + '-post-item-create', function (params) {
-				params.view.currentItemModel.setCacheList(params.view.itemModelList);
+				params.view.currentModel.setCacheList(params.view.currentList);
 			});
 			this.resetToolbar(this.itemComponent, true);
 			this.itemComponent.render(this.tabs.getTabHtmlId('item'));
@@ -132,15 +138,13 @@ define(['controller/selectionController', 'model/cacheModel', 'model/cartMasterM
 			var list = this.itemComponent.getRecords();
 			for (var idx in params) {
 				var productId = params[idx].productId;
-				var model = list.findWhere({productId: productId});
+				var model = _.findWhere(list,{productId: productId});
 				if (model) {
-					var qty = model.get('quantity');
-					model.set({quantity: ++qty, validate: true});
+					model.quantity++
+					this.itemComponent.updateRecord(model);
 				} else {
-					model = list.push({productId: productId, quantity: 1}); 
-					model.setCacheList(list);
+					this.itemComponent.addRecords({productId: productId, quantity: 1}); 
 				}
-				model.save({}, {});
 			}
 		},
 		getChilds: function(name){
@@ -152,9 +156,8 @@ define(['controller/selectionController', 'model/cacheModel', 'model/cartMasterM
 		},
 		setChilds: function(childName,childData){
 			for (var idx in this.childComponents) {
-				if (this.childComponents[idx].name === name) {
-					var records = this.childComponents[idx].getRecords();
-					records.set(childData);
+				if (this.childComponents[idx].name === childName) {
+					this.childComponents[idx].setRecords(childData);
 				}
 			}
 		}

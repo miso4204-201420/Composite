@@ -43,6 +43,7 @@ define(['model/productModel'], function(productModel) {
 		    if(options.pageSize){
 		    	this.pageSize = options.pageSize;
 		    }
+			this.currentList = new this.listModelClass();
             var self = this;
             if(self.postInit){
             	self.postInit(options);
@@ -53,7 +54,7 @@ define(['model/productModel'], function(productModel) {
                 Backbone.trigger(this.componentId + '-' + 'instead-product-create', {view: this});
             } else {
                 Backbone.trigger(this.componentId + '-' + 'pre-product-create', {view: this});
-                this.currentProductModel = new this.modelClass({componentId: this.componentId});
+                this.currentModel = new this.modelClass({componentId: this.componentId});
                 this._renderEdit();
                 Backbone.trigger(this.componentId + '-' + 'post-product-create', {view: this});
             }
@@ -67,16 +68,16 @@ define(['model/productModel'], function(productModel) {
             } else {
                 Backbone.trigger(this.componentId + '-' + 'pre-product-list', {view: this, data: data});
                 var self = this;
-				if(!this.productModelList){
-	                this.productModelList = new this.listModelClass();
+				if(!this.currentList){
+	                this.currentList = new this.listModelClass();
 				}
 				if (this.pageSize) {
-					this.productModelList.setPageSize(this.pageSize);
+					this.currentList.setPageSize(this.pageSize);
 				}
-                this.productModelList.fetch({
+                this.currentList.fetch({
                     data: data,
                     success: function(resp) {
-                        callback.call(context,{data: self.productModelList, page: resp.state.currentPage, pages: resp.state.totalPages, totalRecords: resp.state.totalRecords});
+                        callback.call(context,{data: self.currentList, page: resp.state.currentPage, pages: resp.state.totalPages, totalRecords: resp.state.totalRecords});
                         Backbone.trigger(self.componentId + '-' + 'post-product-list', {view: self});
                     },
                     error: function(mode, error) {
@@ -92,18 +93,18 @@ define(['model/productModel'], function(productModel) {
                 Backbone.trigger(this.componentId + '-' + 'instead-product-edit', {view: this, id: id, data: data});
             } else {
                 Backbone.trigger(this.componentId + '-' + 'pre-product-edit', {view: this, id: id, data: data});
-                if (this.productModelList) {
-                    this.currentProductModel = this.productModelList.get(id);
-                    this.currentProductModel.set('componentId',this.componentId); 
+                if (this.currentList) {
+                    this.currentModel = this.currentList.get(id);
+                    this.currentModel.set('componentId',this.componentId); 
                     this._renderEdit();
                     Backbone.trigger(this.componentId + '-' + 'post-product-edit', {view: this, id: id, data: data});
                 } else {
                     var self = this;
-                    this.currentProductModel = new this.modelClass({id: id});
-                    this.currentProductModel.fetch({
+                    this.currentModel = new this.modelClass({id: id});
+                    this.currentModel.fetch({
                         data: data,
                         success: function() {
-                            self.currentProductModel.set('componentId',self.componentId); 
+                            self.currentModel.set('componentId',self.componentId); 
                             self._renderEdit();
                             Backbone.trigger(self.componentId + '-' + 'post-product-edit', {view: this, id: id, data: data});
                         },
@@ -123,7 +124,7 @@ define(['model/productModel'], function(productModel) {
                 Backbone.trigger(this.componentId + '-' + 'pre-product-delete', {view: this, id: id});
                 var deleteModel = new this.modelClass({id: id});
                 if(deleteModel.setCacheList){
-                    deleteModel.setCacheList(this.productModelList);
+                    deleteModel.setCacheList(this.currentList);
                 }
                 deleteModel.destroy({
                     success: function() {
@@ -142,11 +143,11 @@ define(['model/productModel'], function(productModel) {
                 Backbone.trigger(this.componentId + '-' + 'instead-product-save', {view: this, model : model});
             } else {
                 Backbone.trigger(this.componentId + '-' + 'pre-product-save', {view: this, model : model});
-                this.currentProductModel.set(model);
-                this.currentProductModel.save({},
+                this.currentModel.set(model);
+                this.currentModel.save({},
                         {
                             success: function(model) {
-                                Backbone.trigger(self.componentId + '-' + 'post-product-save', {model: self.currentProductModel});
+                                Backbone.trigger(self.componentId + '-' + 'post-product-save', {model: self.currentModel});
                             },
                             error: function(error) {
                                 Backbone.trigger(self.componentId + '-' + 'error', {event: 'product-save', view: self, error: error});
@@ -157,27 +158,78 @@ define(['model/productModel'], function(productModel) {
         _renderList: function() {
             var self = this;
             this.$el.slideUp("fast", function() {
-                self.$el.html(self.listTemplate({products: self.productModelList.models, componentId: self.componentId, showEdit : self.showEdit , showDelete : self.showDelete}));
+                self.$el.html(self.listTemplate({products: self.currentList.models, componentId: self.componentId, showEdit : self.showEdit , showDelete : self.showDelete}));
                 self.$el.slideDown("fast");
             });
         },
         _renderEdit: function() {
             var self = this;
             this.$el.slideUp("fast", function() {
-                self.$el.html(self.editTemplate({product: self.currentProductModel, componentId: self.componentId , showEdit : self.showEdit , showDelete : self.showDelete
+                self.$el.html(self.editTemplate({product: self.currentModel, componentId: self.componentId , showEdit : self.showEdit , showDelete : self.showDelete
  
 				}));
                 self.$el.slideDown("fast");
             });
         },
 		setPage: function(page){
-		    this.productModelList.state.currentPage = page;
+		    this.currentList.state.currentPage = page;
 		},
         setPageSize: function(pageSize){
             this.pageSize = pageSize;
         },
 		getRecords: function(){
-			return this.productModelList;
+			return this.currentList;
+		},
+		setRecords: function(records){
+			this.currentList.reset(records);
+		},
+		getDeletedRecords: function(){
+			return this.currentList.deletedModels || [];
+		},
+		getCreatedRecords: function(){
+			var createdArray = [];
+			for (var idx in this.currentList.models) {
+				var model = this.currentList.models[idx];
+				if (model.isCreated && model.isCreated()) {
+					var jsonModel = model.toJSON();
+					delete jsonModel.id;
+					createdArray.push(jsonModel);
+				}
+			}
+			return createdArray;
+		},
+		getUpdatedRecords: function(){
+			var updatedArray = [];
+			for (var idx in this.currentList.models) {
+				var model = this.currentList.models[idx];
+				if (model.isUpdated && model.isUpdated()) {
+					updatedArray.push(model.toJSON());
+				}
+			}
+			return updatedArray;
+		},
+		addRecords: function(objArray){
+			if (Array.isArray(objArray)) {
+				for (var idx in objArray) {
+					var newModel = this.currentList.push(objArray[idx]);
+					if (newModel.setCacheList) {
+						newModel.setCacheList(this.currentList);
+						newModel.save({}, {});
+					}
+				}
+			}else{
+				if (typeof(objArray)==="object") {
+					var newModel = this.currentList.push(objArray);
+					if (newModel.setCacheList) {
+						newModel.setCacheList(this.currentList);
+						newModel.save({}, {});
+					}
+				}
+			}
+			
+		},
+		updateRecord: function(record){
+			this.currentList.add(record,{merge: true});
 		}
     });
     return App.Controller._ProductController;

@@ -31,8 +31,8 @@ define(['component/_CRUDComponent', 'model/itemModel', 'controller/itemControlle
     App.Component.ItemComponent = App.Component._CRUDComponent.extend({
         name: 'item',
         cacheMode: false,
-        model: App.Model.ItemModel,
-        listModel: App.Model.ItemList,
+        modelClass: App.Model.ItemModel,
+        listModelClass: App.Model.ItemList,
         controller: App.Controller.ItemController,
         postInit: function () {
             this.listComponent.addColumn('productId', 'Product Id');
@@ -42,16 +42,12 @@ define(['component/_CRUDComponent', 'model/itemModel', 'controller/itemControlle
             this.cacheMode = true;
              if (params && params.mode === "memory") {
                 var itemModels = App.Utils.convertToModel(App.Utils.createCacheModel(App.Model.ItemModel), params.data);
-                this.model = App.Utils.createCacheModel(App.Model.ItemModel);
-                this.listModel = App.Utils.createCacheList(this.model, App.Model.ItemList, itemModels);
+                this.modelClass = App.Utils.createCacheModel(App.Model.ItemModel);
+                this.listModelClass = App.Utils.createCacheList(this.modelClass, App.Model.ItemList, itemModels);
             } else {
-                this.model = App.Model.ItemModel;
-                this.listModel = App.Model.ItemList;
+                this.modelClass = App.Model.ItemModel;
+                this.listModelClass = App.Model.ItemList;
             }
-        },
-        changeCacheMode: function(params){
-            this.configCache(params);
-            this.componentController = new this.controller({modelClass: this.model, listModelClass: this.listModel, componentId: this.componentId, pageSize: this.pageSize});
         }
     });
     return App.Component.ItemComponent;

@@ -69,30 +69,11 @@ define(['App', 'controller/messageController'], function(App, Messages) {
             listModel.cacheModels = initialList;
             return listClass.extend(listModel);
         },
-		divideCacheList: function (component,childComponent) {
-			var name = childComponent.name;
-			var models = childComponent.getRecords();
-			component.model.set('list' + name, []);
-			component.model.set('create' + name, []);
-			component.model.set('update' + name, []);
-			component.model.set('delete' + name, []);
-			for (var i = 0; i < models.models.length; i++) {
-				var m = models.models[i];
-				var modelCopy = m.clone();
-				if (m.isCreated()) {
-					//set the id to null
-					modelCopy.unset('id');
-					component.model.get('create'+name).push(modelCopy.toJSON());
-					//modificado para composite
-					m.created = false;
-				} else if (m.isUpdated()) {
-					component.model.get('update'+name).push(modelCopy.toJSON());
-				}
-			}
-			for (var i = 0; i < models.deletedModels.length; i++) {
-				var m = models.deletedModels[i];
-				component.model.get('delete' + name).push(m.toJSON());
-			}
+		fillCacheList: function (name, destModel, deletedRecords, updatedRecords, createdRecords) {
+			destModel.set('list' + name, []);
+			destModel.set('create' + name, createdRecords);
+			destModel.set('update' + name, updatedRecords);
+			destModel.set('delete' + name, deletedRecords);
 		},
         getComponentList: function(componentName, callBack, aliasName) {
             var self = this;
@@ -100,7 +81,7 @@ define(['App', 'controller/messageController'], function(App, Messages) {
                 require(["component/" + componentName], function(componentDef) {
                     var component = new componentDef();
                     component.initialize();
-                    var model = new component.listModel();
+                    var model = new component.listModelClass();
                     model.fetch({
                         success: function() {
                             self.cache[componentName] = model;

@@ -108,7 +108,9 @@ define(['model/toolbarModel'], function () {
 		},
 		updateUI: function(callback, context){
 			this.renderOnChange = false;
-			callback.call(context);
+			if (callback) {
+				callback.call(context);
+			}
 			this.renderOnChange = true;
 			this.render();
 		}

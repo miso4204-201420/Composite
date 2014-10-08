@@ -53,7 +53,7 @@ define(['model/cartModel'], function(cartModel) {
                 Backbone.trigger(this.componentId + '-' + 'instead-cart-create', {view: this});
             } else {
                 Backbone.trigger(this.componentId + '-' + 'pre-cart-create', {view: this});
-                this.currentCartModel = new this.modelClass({componentId: this.componentId});
+                this.currentModel = new this.modelClass({componentId: this.componentId});
                 this._renderEdit();
                 Backbone.trigger(this.componentId + '-' + 'post-cart-create', {view: this});
             }
@@ -67,16 +67,16 @@ define(['model/cartModel'], function(cartModel) {
             } else {
                 Backbone.trigger(this.componentId + '-' + 'pre-cart-list', {view: this, data: data});
                 var self = this;
-				if(!this.cartModelList){
-	                this.cartModelList = new this.listModelClass();
+				if(!this.currentList){
+	                this.currentList = new this.listModelClass();
 				}
 				if (this.pageSize) {
-					this.cartModelList.setPageSize(this.pageSize);
+					this.currentList.setPageSize(this.pageSize);
 				}
-                this.cartModelList.fetch({
+                this.currentList.fetch({
                     data: data,
                     success: function(resp) {
-                        callback.call(context,{data: self.cartModelList, page: resp.state.currentPage, pages: resp.state.totalPages, totalRecords: resp.state.totalRecords});
+                        callback.call(context,{data: self.currentList, page: resp.state.currentPage, pages: resp.state.totalPages, totalRecords: resp.state.totalRecords});
                         Backbone.trigger(self.componentId + '-' + 'post-cart-list', {view: self});
                     },
                     error: function(mode, error) {
@@ -92,18 +92,18 @@ define(['model/cartModel'], function(cartModel) {
                 Backbone.trigger(this.componentId + '-' + 'instead-cart-edit', {view: this, id: id, data: data});
             } else {
                 Backbone.trigger(this.componentId + '-' + 'pre-cart-edit', {view: this, id: id, data: data});
-                if (this.cartModelList) {
-                    this.currentCartModel = this.cartModelList.get(id);
-                    this.currentCartModel.set('componentId',this.componentId); 
+                if (this.currentList) {
+                    this.currentModel = this.currentList.get(id);
+                    this.currentModel.set('componentId',this.componentId); 
                     this._renderEdit();
                     Backbone.trigger(this.componentId + '-' + 'post-cart-edit', {view: this, id: id, data: data});
                 } else {
                     var self = this;
-                    this.currentCartModel = new this.modelClass({id: id});
-                    this.currentCartModel.fetch({
+                    this.currentModel = new this.modelClass({id: id});
+                    this.currentModel.fetch({
                         data: data,
                         success: function() {
-                            self.currentCartModel.set('componentId',self.componentId); 
+                            self.currentModel.set('componentId',self.componentId); 
                             self._renderEdit();
                             Backbone.trigger(self.componentId + '-' + 'post-cart-edit', {view: this, id: id, data: data});
                         },
@@ -123,7 +123,7 @@ define(['model/cartModel'], function(cartModel) {
                 Backbone.trigger(this.componentId + '-' + 'pre-cart-delete', {view: this, id: id});
                 var deleteModel = new this.modelClass({id: id});
                 if(deleteModel.setCacheList){
-                    deleteModel.setCacheList(this.cartModelList);
+                    deleteModel.setCacheList(this.currentList);
                 }
                 deleteModel.destroy({
                     success: function() {
@@ -142,11 +142,11 @@ define(['model/cartModel'], function(cartModel) {
                 Backbone.trigger(this.componentId + '-' + 'instead-cart-save', {view: this, model : model});
             } else {
                 Backbone.trigger(this.componentId + '-' + 'pre-cart-save', {view: this, model : model});
-                this.currentCartModel.set(model);
-                this.currentCartModel.save({},
+                this.currentModel.set(model);
+                this.currentModel.save({},
                         {
                             success: function(model) {
-                                Backbone.trigger(self.componentId + '-' + 'post-cart-save', {model: self.currentCartModel});
+                                Backbone.trigger(self.componentId + '-' + 'post-cart-save', {model: self.currentModel});
                             },
                             error: function(error) {
                                 Backbone.trigger(self.componentId + '-' + 'error', {event: 'cart-save', view: self, error: error});
@@ -157,27 +157,78 @@ define(['model/cartModel'], function(cartModel) {
         _renderList: function() {
             var self = this;
             this.$el.slideUp("fast", function() {
-                self.$el.html(self.listTemplate({carts: self.cartModelList.models, componentId: self.componentId, showEdit : self.showEdit , showDelete : self.showDelete}));
+                self.$el.html(self.listTemplate({carts: self.currentList.models, componentId: self.componentId, showEdit : self.showEdit , showDelete : self.showDelete}));
                 self.$el.slideDown("fast");
             });
         },
         _renderEdit: function() {
             var self = this;
             this.$el.slideUp("fast", function() {
-                self.$el.html(self.editTemplate({cart: self.currentCartModel, componentId: self.componentId , showEdit : self.showEdit , showDelete : self.showDelete
+                self.$el.html(self.editTemplate({cart: self.currentModel, componentId: self.componentId , showEdit : self.showEdit , showDelete : self.showDelete
  
 				}));
                 self.$el.slideDown("fast");
             });
         },
 		setPage: function(page){
-		    this.cartModelList.state.currentPage = page;
+		    this.currentList.state.currentPage = page;
 		},
         setPageSize: function(pageSize){
             this.pageSize = pageSize;
         },
 		getRecords: function(){
-			return this.cartModelList;
+			return this.currentList;
+		},
+		setRecords: function(records){
+			this.currentList.reset(records);
+		},
+		getDeletedRecords: function(){
+			return this.currentList.deletedModels || [];
+		},
+		getCreatedRecords: function(){
+			var createdArray = [];
+			for (var idx in this.currentList.models) {
+				var model = this.currentList.models[idx];
+				if (model.isCreated && model.isCreated()) {
+					var jsonModel = model.toJSON();
+					delete jsonModel.id;
+					createdArray.push(jsonModel);
+				}
+			}
+			return createdArray;
+		},
+		getUpdatedRecords: function(){
+			var updatedArray = [];
+			for (var idx in this.currentList.models) {
+				var model = this.currentList.models[idx];
+				if (model.isUpdated && model.isUpdated()) {
+					updatedArray.push(model.toJSON());
+				}
+			}
+			return updatedArray;
+		},
+		addRecords: function(objArray){
+			if (Array.isArray(objArray)) {
+				for (var idx in objArray) {
+					var newModel = this.currentList.push(objArray[idx]);
+					if (newModel.setCacheList) {
+						newModel.setCacheList(this.currentList);
+						newModel.save({}, {});
+					}
+				}
+			}else{
+				if (typeof(objArray)==="object") {
+					var newModel = this.currentList.push(objArray);
+					if (newModel.setCacheList) {
+						newModel.setCacheList(this.currentList);
+						newModel.save({}, {});
+					}
+				}
+			}
+			
+		},
+		updateRecord: function(record){
+			this.currentList.add(record,{merge: true});
 		}
     });
     return App.Controller._CartController;
