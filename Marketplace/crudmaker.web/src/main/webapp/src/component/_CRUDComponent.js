@@ -339,7 +339,7 @@ define(['controller/messageController', 'component/toolbarComponent', 'component
 		},
         changeCacheMode: function(params){
             this.configCache(params);
-            this.componentController = new this.controller({modelClass: this.model, listModelClass: this.listModel, componentId: this.componentId, pageSize: this.pageSize});
+            this.componentController = new this.controller({modelClass: this.modelClass, listModelClass: this.listModelClass, componentId: this.componentId, pageSize: this.pageSize});
         }
 	});
 	return App.Component._CRUDComponent;
