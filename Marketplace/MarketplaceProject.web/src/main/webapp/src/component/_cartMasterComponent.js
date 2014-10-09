@@ -17,16 +17,7 @@ define(['controller/tabController', 'component/cartComponent', 'component/itemCo
 			this.childComponents = [];
 			this.masterComponent.initialize();
 			
-			this.masterElement = this.componentId+"-master";
-			this.tabsElement = this.componentId+"-tabs";
-			this.el = options && options.el || this.configuration.el;
-			
-			$(this.el).append("<div id='"+this.masterElement+"'></div>");
-			$(this.el).append("<div id='"+this.tabsElement+"'></div>");
-			
 			this.initializeChildComponents();
-			
-			this.masterComponent.render(this.masterElement);
 			
 			Backbone.on(this.masterComponent.componentId + '-post-cart-create', function (params) {
 				self.renderChilds(params);
@@ -65,6 +56,20 @@ define(['controller/tabController', 'component/cartComponent', 'component/itemCo
 					}
 				});
 			});
+			if (this.postInit) {
+				this.postInit();
+			}
+		},
+		render: function(domElementId){
+			if (domElementId) {
+				var rootElementId = $("#"+domElementId);
+				this.masterElement = this.componentId + "-master";
+				this.tabsElement = this.componentId + "-tabs";
+
+				rootElementId.append("<div id='" + this.masterElement + "'></div>");
+				rootElementId.append("<div id='" + this.tabsElement + "'></div>");
+			}
+			this.masterComponent.render(this.masterElement);
 		},
 		initializeChildComponents: function () {
 			this.tabModel = new App.Model.TabModel({tabs: [{label: "Item", name: "item", enable: true}]});
@@ -82,7 +87,7 @@ define(['controller/tabController', 'component/cartComponent', 'component/itemCo
 			Backbone.on(this.itemComponent.componentId + '-post-item-create', function (params) {
 				params.view.currentModel.setCacheList(params.view.currentList);
 			});
-			this.resetToolbar(this.itemComponent, true);
+			this.configToolbar(this.itemComponent, true);
 			this.childComponents.push(this.itemComponent);
 		},
 		renderChilds: function (params) {
@@ -112,34 +117,32 @@ define(['controller/tabController', 'component/cartComponent', 'component/itemCo
 		showMaster: function (flag) {
 			if (typeof (flag) === "boolean") {
 				if (flag) {
-					this.masterComponent.componentController.$el.show();
+					$("#"+this.masterElement).show();
 				} else {
-					this.masterComponent.componentController.$el.hide();
+					$("#"+this.masterElement).hide();
 				}
 			}
 		},
 		hideChilds: function () {
 			$("#"+this.tabsElement).hide();
 		},
-		resetToolbar: function (component, composite) {
-			component.updateUI(function () {
-				component.removeGlobalAction('refresh');
-				component.removeGlobalAction('print');
-				component.removeGlobalAction('search');
-				if (!composite) {
-					component.removeGlobalAction('create');
-					component.removeGlobalAction('save');
-					component.removeGlobalAction('cancel');
-					component.addGlobalAction({
-						name: 'add',
-						icon: 'glyphicon-send',
-						displayName: 'Add',
-						show: true
-					}, function () {
-						Backbone.trigger(component.componentId + '-toolbar-add');
-					});
-				}
-			},this);
+		configToolbar: function (component, composite) {
+			component.removeGlobalAction('refresh');
+			component.removeGlobalAction('print');
+			component.removeGlobalAction('search');
+			if (!composite) {
+				component.removeGlobalAction('create');
+				component.removeGlobalAction('save');
+				component.removeGlobalAction('cancel');
+				component.addGlobalAction({
+					name: 'add',
+					icon: 'glyphicon-send',
+					displayName: 'Add',
+					show: true
+				}, function () {
+					Backbone.trigger(component.componentId + '-toolbar-add');
+				});
+			}
 		},
 		addItems: function (params) {
 			var list = this.itemComponent.getRecords();
@@ -165,6 +168,16 @@ define(['controller/tabController', 'component/cartComponent', 'component/itemCo
 			for (var idx in this.childComponents) {
 				if (this.childComponents[idx].name === childName) {
 					this.childComponents[idx].setRecords(childData);
+				}
+			}
+		},
+		renderMaster: function(domElementId){
+			this.masterComponent.render(domElementId);
+		},
+		renderChild: function(childName, domElementId){
+			for (var idx in this.childComponents) {
+				if (this.childComponents[idx].name === childName) {
+					this.childComponents[idx].render(domElementId);
 				}
 			}
 		}

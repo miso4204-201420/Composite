@@ -80,7 +80,11 @@ define([], function() {
                 this.deletedModels.push(model);
             }
             Backbone.Collection.prototype.remove.call(this, model, options);
-        }
+        },
+		reset: function(params){
+			Backbone.Collection.prototype.reset.call(this, params);
+			this.deletedModels = [];
+		}
     };
 
 });

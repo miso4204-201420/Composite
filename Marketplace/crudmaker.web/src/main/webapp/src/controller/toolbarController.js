@@ -4,17 +4,15 @@ define(['model/toolbarModel'], function () {
 			App.Utils.loadTemplate('toolbar');
 			this.template = _.template($('#toolbar-list-template').html());
 			this.listenTo(this.model, 'change', this.render);
-			this.renderOnChange = true;
 		},
 		render: function () {
-			if (this.renderOnChange && this.model.get("show")) {
+			if (this.model.get("show")) {
 				this.$el.html(this.template(this.model.toJSON()));
 			}
 			return this;
 		},
 		setTemplate: function (templateName) {
 			this.template = _.template($('#' + templateName).html());
-			this.render();
 		},
 		addButton: function (params, callBack, context) {
 
@@ -38,8 +36,6 @@ define(['model/toolbarModel'], function () {
 			Backbone.on(this.model.get('componentId') + '-toolbar-button-' + params.name, function (args) {
 				callBack.call(context, args);
 			});
-			
-			this.render();
 		},
 		removeButton: function (name) {
 			for (i in this.model.get('menus')) {
@@ -47,7 +43,6 @@ define(['model/toolbarModel'], function () {
 					if (name == this.model.get('menus')[i].get('buttons')[j].get('name')) {
 						Backbone.off(this.model.get('componentId') + '-toolbar-button-' + this.model.get('menus')[i].get('buttons')[j].get('name'));
 						this.model.get('menus')[i].get('buttons').splice(j, 1);
-						this.render();
 					}
 				}
 			}
@@ -60,7 +55,6 @@ define(['model/toolbarModel'], function () {
 			});
 
 			this.model.get('menus').push(newMenu);
-			this.render();
 		},
 		removeMenu: function (name) {
 			for (var i = 0; i < this.model.get('menus').length; i++) {
@@ -69,7 +63,6 @@ define(['model/toolbarModel'], function () {
 						Backbone.off(this.model.get('componentId') + '-toolbar-button-' + this.model.get('menus')[i].get('buttons')[j].get('name'));
 					}
 					this.model.get('menus').splice(i, 1);
-					this.render();
 				}
 			}
 		},
@@ -78,7 +71,6 @@ define(['model/toolbarModel'], function () {
 				for (j in this.model.get('menus')[i].get('buttons')) {
 					if (name == this.model.get('menus')[i].get('buttons')[j].get('name')) {
 						this.model.get('menus')[i].get('buttons')[j].set('show', true);
-						this.render();
 					}
 				}
 			}
@@ -88,7 +80,6 @@ define(['model/toolbarModel'], function () {
 				for (j in this.model.get('menus')[i].get('buttons')) {
 					if (name == this.model.get('menus')[i].get('buttons')[j].get('name')) {
 						this.model.get('menus')[i].get('buttons')[j].set('show', false);
-						this.render();
 					}
 				}
 			}
@@ -105,14 +96,6 @@ define(['model/toolbarModel'], function () {
 			} else {
 				console.log("parameter value must be boolean type");
 			}
-		},
-		updateUI: function(callback, context){
-			this.renderOnChange = false;
-			if (callback) {
-				callback.call(context);
-			}
-			this.renderOnChange = true;
-			this.render();
 		}
 	});
 	return App.Controller.ToolbarController;

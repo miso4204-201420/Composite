@@ -164,8 +164,8 @@ define(['model/itemModel'], function(itemModel) {
                             success: function(model) {
                                 Backbone.trigger(self.componentId + '-' + 'post-item-save', {model: self.currentModel});
                             },
-                            error: function(error) {
-                                Backbone.trigger(self.componentId + '-' + 'error', {event: 'item-save', view: self, error: error});
+                            error: function(model,response,options) {
+                                Backbone.trigger(self.componentId + '-' + 'error', {event: 'item-save', view: self, error: response});
                             }
                         });
             }
@@ -201,7 +201,7 @@ define(['model/itemModel'], function(itemModel) {
 			this.currentList.reset(records);
 		},
 		getDeletedRecords: function(){
-			var deletedArray = []
+			var deletedArray = [];
 			if (this.currentList.deletedModels) {
 				for (var idx in this.currentList.deletedModels) {
 					deletedArray.push(this.currentList.deletedModels[idx].toJSON());
@@ -256,8 +256,6 @@ define(['model/itemModel'], function(itemModel) {
 		},
 		clearCache: function(){
 			this.currentList.reset();
-			var list = this.currentList;
-			list.deletedModels = [];
 		}
     });
     return App.Controller._ItemController;

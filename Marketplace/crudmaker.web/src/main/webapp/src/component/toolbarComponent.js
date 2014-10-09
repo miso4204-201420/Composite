@@ -46,9 +46,6 @@ define(['controller/toolbarController'], function () {
 		},
 		display: function (flag) {
 			this.toolbarController.display(flag);
-		},
-		updateUI: function(callback,context){
-			this.toolbarController.updateUI(callback,context);
 		}
 	});
 

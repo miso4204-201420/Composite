@@ -10,7 +10,6 @@ define(['model/listModel'], function () {
 			App.Utils.loadTemplate('list');
 			this.template = _.template($('#list-template').html());
 			Backbone.on(this.model.get('componentId') + "-" + this.model.get('name') + "-select", this.updateSelectedItems, this);
-			this.renderOnChange = true;
 		},
 		updateSelectedItems: function (params) {
 			var idField = this.model.get('idField');
@@ -35,14 +34,13 @@ define(['model/listModel'], function () {
 			return this.model.get('selectedItems');
 		},
 		render: function () {
-			if (this.renderOnChange && this.model.get("show")) {
+			if (this.model.get("show")) {
 				this.$el.html(this.template(this.model.toJSON()));
 			}
 			return this;
 		},
 		setTemplate: function (templateName) {
 			this.template = _.template($('#' + templateName).html());
-			this.render();
 		},
 		setData: function (args) {
 			if (args.data) {
@@ -57,7 +55,6 @@ define(['model/listModel'], function () {
 			if (args.pagination !== undefined) {
 				this.model.set('pagination', args.pagination);
 			}
-			this.render();
 		},
 		addAction: function (params, callBack, context) {
 			var i = this.model.get('actions').length;
@@ -78,16 +75,12 @@ define(['model/listModel'], function () {
 			Backbone.on(this.model.get('componentId') + '-' + this.model.get('name') + '-' + params.name, function (args) {
 				callBack.call(context, args)
 			});
-
-			this.render();
-
 		},
 		removeAction: function (actionName) {
 			for (var i = 0; i < this.model.get('actions').length; i++) {
 				if (actionName == this.model.get('actions')[i].get('name')) {
 					Backbone.off(this.model.get('componentId') + '-' + this.model.get('name') + '-' + actionName);
 					this.model.get('actions').splice(i, 1);
-					this.render();
 				}
 			}
 		},
@@ -95,7 +88,6 @@ define(['model/listModel'], function () {
 			for (i in this.model.get('actions')) {
 				if (name == this.model.get('actions')[i].get('name')) {
 					this.model.get('actions')[i].set('show', true);
-					this.render();
 				}
 			}
 		},
@@ -103,7 +95,6 @@ define(['model/listModel'], function () {
 			for (i in this.model.get('actions')) {
 				if (name == this.model.get('actions')[i].get('name')) {
 					this.model.get('actions')[i].set('show', false);
-					this.render();
 				}
 			}
 		},
@@ -113,13 +104,11 @@ define(['model/listModel'], function () {
 						displayName: displayName,
 						formula: formula
 					});
-			this.render();
 		},
 		removeColumn: function (columnName) {
 			for (var i = 0; i < this.model.get('columns').length; i++) {
 				if (columnName == this.model.get('columns')[i].get('name')) {
 					this.model.get('actions').splice(i, 1);
-					this.render();
 				}
 			}
 		},
@@ -130,7 +119,6 @@ define(['model/listModel'], function () {
 		},
 		clearSelectedRecords: function () {
 			this.model.set('selectedItems', []);
-			this.render();
 		},
 		display: function (flag) {
 			if (typeof (flag) === "boolean") {
@@ -144,14 +132,6 @@ define(['model/listModel'], function () {
 			} else {
 				console.log("parameter value must be boolean type");
 			}
-		},
-		updateUI: function (callback,context) {
-			this.renderOnChange = false;
-			if (callback) {
-				callback.call(context);
-			}
-			this.renderOnChange = true;
-			this.render();
 		}
 	});
 

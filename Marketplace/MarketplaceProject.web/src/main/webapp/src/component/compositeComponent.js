@@ -11,19 +11,26 @@ define(['component/productComponent', 'component/cartMasterComponent'], function
             this.componentId = App.Utils.randomInteger();
             this.name = "MarketPlace";
 
-            var rootElement = $("#maindiv")
-            rootElement.append("<div id='main1' class='col-md-8'></div>");
-            rootElement.append("<div id='cart' class='col-md-4'></div>");
-
             this.setupProductComponent();
             this.setupCartMasterComponent();
         },
-        render: function() {
+        render: function(domElementId) {
+			if (domElementId) {
+				var rootElement = $("#"+domElementId)
+				rootElement.append("<div id='main1' class='col-md-8'></div>");
+				rootElement.append("<div id='cart' class='col-md-4'></div>");
+				$("#cart").append("<div id='master'></div>");
+				$("#cart").append("<div id='items'></div>");
+				this.productComponent.render("main1");
+				this.cartMasterComponent.renderMaster('master');
+				this.cartMasterComponent.masterComponent.create();
+				this.cartMasterComponent.renderChild('item','items');
+			}
             this.productComponent.renderRecords();
-            this.cartMasterComponent.itemComponent.render();
+            this.cartMasterComponent.renderChild('item');
         },
         setupProductComponent: function() {
-            this.productComponent = new cartCp({componentId: this.componentId, el: "#main1"});
+            this.productComponent = new cartCp();
             this.productComponent.initialize();
             this.productComponent.enableMultipleSelection(true);
             this.productComponent.setReadOnly(true);
@@ -45,12 +52,10 @@ define(['component/productComponent', 'component/cartMasterComponent'], function
             },
             this.addToCart,
             this);
-            
-            this.productComponent.render("main1");
         },
         setupCartMasterComponent: function() {
-            this.cartMasterComponent = new cartMasterCp({componentId: this.componentId});
-            this.cartMasterComponent.initialize({el: "#cart"});
+            this.cartMasterComponent = new cartMasterCp();
+            this.cartMasterComponent.initialize();
             this.cartMasterComponent.masterComponent.clearGlobalActions();
             this.cartMasterComponent.masterComponent.addGlobalAction({
                 name: 'checkout',
@@ -65,15 +70,10 @@ define(['component/productComponent', 'component/cartMasterComponent'], function
                 var messagesController = new App.Controller.MessageController({el: '#' + this.messageDomId});
                 messagesController.showMessage('info', 'Items saved in server', true, 3);
             },this.cartMasterComponent.masterComponent);
-            this.cartMasterComponent.masterComponent.render();
-            this.cartMasterComponent.masterComponent.create();
             
             this.cartMasterComponent.itemComponent.setGlobalActionsVisible(false);
             this.cartMasterComponent.itemComponent.disableEdit();
 			this.cartMasterComponent.hideChilds();
-			$("#cart").append("<div id='items'></div>");
-            this.cartMasterComponent.itemComponent.render('items');
-            
         },
         addToCart: function() {
             var items = this.productComponent.getSelectedRecords();

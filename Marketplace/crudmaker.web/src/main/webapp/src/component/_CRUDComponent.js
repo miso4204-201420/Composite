@@ -28,6 +28,7 @@ define(['controller/messageController', 'component/toolbarComponent', 'component
 			Backbone.on(self.componentController.componentId + '-post-' + self.name + '-save', function (params) {
 				self.toolbarComponent.hideButton('save');
 				self.toolbarComponent.hideButton('cancel');
+				self.toolbarComponent.render();
 				self.componentController.list(params, self.list, self);
 				var messagesController = new Messages({el: '#' + self.messageDomId});
 				messagesController.showMessage('info', 'The ' + self.name + ' has been successfully saved.', true, 3);
@@ -75,7 +76,7 @@ define(['controller/messageController', 'component/toolbarComponent', 'component
 			if (this.componentController._loadRequiredComponentsData) {
 				this.componentController._loadRequiredComponentsData(function () {
 					if (self.showToolbar) {
-						self.toolbarComponent.toolbarController.render();
+						self.toolbarComponent.render();
 					}
 					if (self.showList) {
 						self.componentController.list(null, self.list, self);
@@ -83,7 +84,7 @@ define(['controller/messageController', 'component/toolbarComponent', 'component
 				});
 			} else {
 				if (this.showToolbar) {
-					this.toolbarComponent.toolbarController.render();
+					this.toolbarComponent.render();
 				}
 				if (this.showList) {
 					this.componentController.list(null, this.list, this);
@@ -93,6 +94,7 @@ define(['controller/messageController', 'component/toolbarComponent', 'component
 		create: function () {
 			this.toolbarComponent.showButton('save');
 			this.toolbarComponent.showButton('cancel');
+			this.toolbarComponent.render();
 			this.componentController.create();
 		},
 		save: function (params) {
@@ -101,12 +103,14 @@ define(['controller/messageController', 'component/toolbarComponent', 'component
 		cancel: function (params) {
 			this.toolbarComponent.hideButton('save');
 			this.toolbarComponent.hideButton('cancel');
+			this.toolbarComponent.render();
 			this.componentController.list(params, this.list, this);
 		},
 		refresh: function (params) {
 			this.componentController.setPage(1);
 			this.toolbarComponent.hideButton('save');
 			this.toolbarComponent.hideButton('cancel');
+			this.toolbarComponent.render();
 			this.componentController.list(params, this.list, this);
 			var messagesController = new App.Controller.MessageController({el: '#' + this.messageDomId});
 			messagesController.showMessage('info', 'Data updated', true, 3);
@@ -120,6 +124,7 @@ define(['controller/messageController', 'component/toolbarComponent', 'component
 		edit: function (params) {
 			this.toolbarComponent.showButton('save');
 			this.toolbarComponent.showButton('cancel');
+			this.toolbarComponent.render();
 			this.componentController.edit(params);
 		},
 		delete: function (params) {
@@ -322,12 +327,6 @@ define(['controller/messageController', 'component/toolbarComponent', 'component
 		},
 		updateRecord: function(record){
 			this.componentController.updateRecord(record);
-		},
-		updateUI: function (callback, context) {
-			var self = this;
-			this.listComponent.updateUI(function () {
-				self.toolbarComponent.updateUI(callback, context);
-			}, context);
 		},
 		addRecords: function(objArray){
 			this.componentController.addRecords(objArray);

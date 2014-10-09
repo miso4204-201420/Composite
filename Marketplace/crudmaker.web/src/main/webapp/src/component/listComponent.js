@@ -56,9 +56,6 @@ define(['controller/listController'], function () {
 		},
 		display: function (flag) {
 			this.listController.display(flag);
-		},
-		updateUI: function (callback,context) {
-			this.listController.updateUI(callback,context);
 		}
 	});
 

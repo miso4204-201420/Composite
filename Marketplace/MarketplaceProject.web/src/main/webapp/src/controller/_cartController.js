@@ -145,13 +145,13 @@ define(['model/cartModel'], function(cartModel) {
                 this.currentModel.set(model);
                 this.currentModel.save({},
                         {
-                            success: function(model) {
-                                Backbone.trigger(self.componentId + '-' + 'post-cart-save', {model: self.currentModel});
-                            },
-                            error: function(error) {
-                                Backbone.trigger(self.componentId + '-' + 'error', {event: 'cart-save', view: self, error: error});
-                            }
-                        });
+							success: function (model) {
+								Backbone.trigger(self.componentId + '-' + 'post-cart-save', {model: self.currentModel});
+							},
+							error: function (model,response,options) {
+								Backbone.trigger(self.componentId + '-' + 'error', {event: 'cart-save', view: self, error: response});
+							}
+						});
             }
         },
         _renderList: function() {
@@ -183,7 +183,7 @@ define(['model/cartModel'], function(cartModel) {
 			this.currentList.reset(records);
 		},
 		getDeletedRecords: function(){
-			var deletedArray = []
+			var deletedArray = [];
 			if (this.currentList.deletedModels) {
 				for (var idx in this.currentList.deletedModels) {
 					deletedArray.push(this.currentList.deletedModels[idx].toJSON());
@@ -238,8 +238,6 @@ define(['model/cartModel'], function(cartModel) {
 		},
 		clearCache: function(){
 			this.currentList.reset();
-			var list = this.currentList;
-			list.deletedModels = [];
 		}
     });
     return App.Controller._CartController;
