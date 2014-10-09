@@ -1,6 +1,6 @@
 define(['controller/messageController', 'component/toolbarComponent', 'component/listComponent'], function (Messages) {
 	App.Component.BasicComponent = function () {
-
+		this.componentId = App.Utils.randomInteger();
 	};
 	App.Component.BasicComponent.extend = Backbone.View.extend;
 
@@ -22,6 +22,9 @@ define(['controller/messageController', 'component/toolbarComponent', 'component
 			this.componentController = new this.controller({modelClass: this.modelClass, listModelClass: this.listModelClass, componentId: this.componentId, pageSize: this.pageSize});
 			this.toolbarComponent = new App.Component.ToolbarComponent({componentId: this.componentId, name: this.name});
 			this.listComponent = new App.Component.ListComponent({componentId: this.componentId, name: this.name});
+			if (options && typeof(options.pagination) === "boolean") {
+				this.listComponent.setData({pagination: options.pagination});
+			}
 			Backbone.on(self.componentController.componentId + '-post-' + self.name + '-save', function (params) {
 				self.toolbarComponent.hideButton('save');
 				self.toolbarComponent.hideButton('cancel');

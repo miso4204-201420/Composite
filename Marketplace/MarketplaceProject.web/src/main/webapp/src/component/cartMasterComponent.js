@@ -5,28 +5,36 @@ define(['controller/selectionController', 'model/cacheModel', 'model/cartMasterM
 		itemComponent
 		) {
 	App.Component.CartMasterComponent = App.Component.BasicComponent.extend({
-		initialize: function () {
+		initialize: function (options) {
 			var self = this;
 			this.configuration = App.Utils.loadComponentConfiguration('cartMaster');
-			var uComponent = new CartComponent();
-			//modificado para composite
-			this.masterComponent = uComponent;
+			//this.componentId = App.Utils.randomInteger();
+			
+			this.masterComponent = new CartComponent();
 			this.childComponents = [];
-			uComponent.initialize();
-			uComponent.render('main');
-			Backbone.on(uComponent.componentId + '-post-cart-create', function (params) {
+			this.masterComponent.initialize();
+			
+			this.masterElement = this.componentId+"-master";
+			this.tabsElement = this.componentId+"-tabs";
+			this.el = options && options.el || this.configuration.el;
+			
+			$(this.el).append("<div id='"+this.masterElement+"'></div>")
+			$(this.el).append("<div id='"+this.tabsElement+"'></div>");
+			
+			this.masterComponent.render(this.masterElement);
+			Backbone.on(this.masterComponent.componentId + '-post-cart-create', function (params) {
 				self.renderChilds(params);
 			});
-			Backbone.on(uComponent.componentId + '-post-cart-edit', function (params) {
+			Backbone.on(this.masterComponent.componentId + '-post-cart-edit', function (params) {
 				self.renderChilds(params);
 			});
-			Backbone.on(uComponent.componentId + '-pre-cart-list', function () {
+			Backbone.on(this.masterComponent.componentId + '-pre-cart-list', function () {
 				self.hideChilds();
 			});
 			Backbone.on('cart-master-model-error', function (error) {
-				Backbone.trigger(uComponent.componentId + '-' + 'error', {event: 'cart-master-save', view: self, message: error});
+				Backbone.trigger(this.masterComponent.componentId + '-' + 'error', {event: 'cart-master-save', view: self, message: error});
 			});
-			Backbone.on(uComponent.componentId + '-instead-cart-save', function (params) {
+			Backbone.on(this.masterComponent.componentId + '-instead-cart-save', function (params) {
 				self.model.set('cartEntity', params.model);
 				if (params.model) {
 					self.model.set('id', params.model.id);
@@ -44,7 +52,7 @@ define(['controller/selectionController', 'model/cacheModel', 'model/cartMasterM
 				
 				self.model.save({}, {
 					success: function () {
-						Backbone.trigger(uComponent.componentId + '-' + 'post-cart-save', {view: self, model: self.model});
+						Backbone.trigger(self.masterComponent.componentId + '-' + 'post-cart-save', {view: self, model: self.model});
 					},
 					error: function (error) {
 						Backbone.trigger(self.componentId + '-' + 'error', {event: 'cart-master-save', view: self, error: error});
@@ -81,12 +89,12 @@ define(['controller/selectionController', 'model/cacheModel', 'model/cartMasterM
 					}
 			);
 			this.tabs = new TabController({model: this.tabModel});
-			this.tabs.render('tabs');
+			this.tabs.render(this.tabsElement);
 			App.Model.CartMasterModel.prototype.urlRoot = this.configuration.context;
 			var options = {
 				success: function () {
 					self.initializeChildComponents();
-					$('#tabs').show();
+					$('#'+self.tabsElement).show();
 				},
 				error: function () {
 					Backbone.trigger(self.componentId + '-' + 'error', {event: 'cart-edit', view: self, id: id, data: data, error: error});
@@ -112,7 +120,7 @@ define(['controller/selectionController', 'model/cacheModel', 'model/cartMasterM
 			}
 		},
 		hideChilds: function () {
-			$('#tabs').hide();
+			$("#"+this.tabsElement).hide();
 		},
 		resetToolbar: function (component, composite) {
 			component.updateUI(function () {

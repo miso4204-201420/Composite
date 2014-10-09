@@ -14,8 +14,6 @@ define(['component/productComponent', 'component/cartMasterComponent'], function
             var rootElement = $("#maindiv")
             rootElement.append("<div id='main1' class='col-md-8'></div>");
             rootElement.append("<div id='cart' class='col-md-4'></div>");
-            $("#cart").append("<div id='main'></div>");
-            $("#cart").append("<div id='items'></div>");
 
             this.setupProductComponent();
             this.setupCartMasterComponent();
@@ -52,7 +50,7 @@ define(['component/productComponent', 'component/cartMasterComponent'], function
         },
         setupCartMasterComponent: function() {
             this.cartMasterComponent = new cartMasterCp({componentId: this.componentId});
-            this.cartMasterComponent.initialize();
+            this.cartMasterComponent.initialize({el: "#cart"});
             this.cartMasterComponent.masterComponent.clearGlobalActions();
             this.cartMasterComponent.masterComponent.addGlobalAction({
                 name: 'checkout',
@@ -72,7 +70,9 @@ define(['component/productComponent', 'component/cartMasterComponent'], function
             
             this.cartMasterComponent.itemComponent.setGlobalActionsVisible(false);
             this.cartMasterComponent.itemComponent.disableEdit();
-            this.cartMasterComponent.itemComponent.render("items");
+			this.cartMasterComponent.hideChilds();
+			$("#cart").append("<div id='items'></div>");
+            this.cartMasterComponent.itemComponent.render('items');
             
         },
         addToCart: function() {
