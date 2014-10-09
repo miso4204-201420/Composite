@@ -8,6 +8,7 @@ define(['controller/selectionController', 'model/cacheModel', 'model/cartMasterM
 		initialize: function (options) {
 			var self = this;
 			this.configuration = App.Utils.loadComponentConfiguration('cartMaster');
+			App.Model.CartMasterModel.prototype.urlRoot = this.configuration.context;
 			//this.componentId = App.Utils.randomInteger();
 			
 			this.masterComponent = new CartComponent();
@@ -18,10 +19,13 @@ define(['controller/selectionController', 'model/cacheModel', 'model/cartMasterM
 			this.tabsElement = this.componentId+"-tabs";
 			this.el = options && options.el || this.configuration.el;
 			
-			$(this.el).append("<div id='"+this.masterElement+"'></div>")
+			$(this.el).append("<div id='"+this.masterElement+"'></div>");
 			$(this.el).append("<div id='"+this.tabsElement+"'></div>");
 			
+			this.initializeChildComponents();
+			
 			this.masterComponent.render(this.masterElement);
+			
 			Backbone.on(this.masterComponent.componentId + '-post-cart-create', function (params) {
 				self.renderChilds(params);
 			});
@@ -61,42 +65,37 @@ define(['controller/selectionController', 'model/cacheModel', 'model/cartMasterM
 			});
 		},
 		initializeChildComponents: function () {
+			this.tabModel = new App.Model.TabModel({tabs: [{label: "Item", name: "item", enable: true}]});
+			this.tabs = new TabController({model: this.tabModel});
+			
 			this.itemComponent = new itemComponent();
 			this.itemComponent.initialize(
 					{
 						cache: {
-							data: this.model.get('listitem'),
+							data: [],
 							mode: "memory"
 						},
 						pagination: false
 					});
-			// this.itemComponent.setPageSize();
-			// this.itemComponent.listComponent.setData({pagination: false});
 			Backbone.on(this.itemComponent.componentId + '-post-item-create', function (params) {
 				params.view.currentModel.setCacheList(params.view.currentList);
 			});
 			this.resetToolbar(this.itemComponent, true);
-			this.itemComponent.render(this.tabs.getTabHtmlId('item'));
 			this.childComponents.push(this.itemComponent);
 		},
 		renderChilds: function (params) {
 			var self = this;
-			this.tabModel = new App.Model.TabModel(
-					{
-						tabs: [
-							{label: "Item", name: "item", enable: true},
-						]
-					}
-			);
-			this.tabs = new TabController({model: this.tabModel});
-			this.tabs.render(this.tabsElement);
-			App.Model.CartMasterModel.prototype.urlRoot = this.configuration.context;
+			
 			var options = {
 				success: function () {
-					self.initializeChildComponents();
+					//self.initializeChildComponents();
+					self.tabs.render(self.tabsElement);
+					self.itemComponent.clearCache();
+					self.itemComponent.setRecords(self.model.get('listitem'));
+					self.itemComponent.render(self.tabs.getTabHtmlId('item'));
 					$('#'+self.tabsElement).show();
 				},
-				error: function () {
+				error: function (error) {
 					Backbone.trigger(self.componentId + '-' + 'error', {event: 'cart-edit', view: self, id: id, data: data, error: error});
 				}
 			};
@@ -107,8 +106,6 @@ define(['controller/selectionController', 'model/cacheModel', 'model/cartMasterM
 				self.model = new App.Model.CartMasterModel();
 				options.success();
 			}
-
-
 		},
 		showMaster: function (flag) {
 			if (typeof (flag) === "boolean") {
@@ -148,7 +145,7 @@ define(['controller/selectionController', 'model/cacheModel', 'model/cartMasterM
 				var productId = params[idx].productId;
 				var model = _.findWhere(list,{productId: productId});
 				if (model) {
-					model.quantity++
+					model.quantity++;
 					this.itemComponent.updateRecord(model);
 				} else {
 					this.itemComponent.addRecords({productId: productId, quantity: 1}); 

@@ -201,7 +201,13 @@ define(['model/itemModel'], function(itemModel) {
 			this.currentList.reset(records);
 		},
 		getDeletedRecords: function(){
-			return this.currentList.deletedModels || [];
+			var deletedArray = []
+			if (this.currentList.deletedModels) {
+				for (var idx in this.currentList.deletedModels) {
+					deletedArray.push(this.currentList.deletedModels[idx].toJSON());
+				}
+			}
+			return deletedArray;
 		},
 		getCreatedRecords: function(){
 			var createdArray = [];
@@ -247,6 +253,11 @@ define(['model/itemModel'], function(itemModel) {
 		},
 		updateRecord: function(record){
 			this.currentList.add(record,{merge: true});
+		},
+		clearCache: function(){
+			this.currentList.reset();
+			var list = this.currentList;
+			list.deletedModels = [];
 		}
     });
     return App.Controller._ItemController;
