@@ -1,6 +1,6 @@
 define(['controller/messageController', 'component/toolbarComponent', 'component/listComponent'], function (Messages) {
 	App.Component.BasicComponent = function () {
-		this.componentId = App.Utils.randomInteger();
+
 	};
 	App.Component.BasicComponent.extend = Backbone.View.extend;
 

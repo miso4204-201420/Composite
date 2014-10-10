@@ -7,15 +7,16 @@
 
 define(['controller/tabController', 'component/cartComponent', 'component/itemComponent', 'controller/selectionController', 'model/cacheModel', 'model/cartMasterModel', 'component/_CRUDComponent'], function(TabController, CartComponent, itemComponent){
 	App.Component._CartMasterComponent = App.Component.BasicComponent.extend({
-		initialize: function (options) {
+		initialize: function () {
 			var self = this;
 			this.configuration = App.Utils.loadComponentConfiguration('cartMaster');
 			App.Model.CartMasterModel.prototype.urlRoot = this.configuration.context;
-			//this.componentId = App.Utils.randomInteger();
+			this.componentId = App.Utils.randomInteger();
 			
 			this.masterComponent = new CartComponent();
-			this.childComponents = [];
 			this.masterComponent.initialize();
+			
+			this.childComponents = [];
 			
 			this.initializeChildComponents();
 			
@@ -38,14 +39,16 @@ define(['controller/tabController', 'component/cartComponent', 'component/itemCo
 				} else {
 					self.model.unset('id');
 				}
-
-				App.Utils.fillCacheList(
-					'item',
-					self.model,
-					self.itemComponent.getDeletedRecords(),
-					self.itemComponent.getUpdatedRecords(),
-					self.itemComponent.getCreatedRecords()
-				);
+				
+				for (var idx in self.childComponents) {
+					App.Utils.fillCacheList(
+						self.childComponents[idx].name,
+						self.model,
+						self.childComponents[idx].getDeletedRecords(),
+						self.childComponents[idx].getUpdatedRecords(),
+						self.childComponents[idx].getCreatedRecords()
+					);
+				}
 				
 				self.model.save({}, {
 					success: function () {
@@ -95,11 +98,13 @@ define(['controller/tabController', 'component/cartComponent', 'component/itemCo
 			
 			var options = {
 				success: function () {
-					//self.initializeChildComponents();
 					self.tabs.render(self.tabsElement);
-					self.itemComponent.clearCache();
-					self.itemComponent.setRecords(self.model.get('listitem'));
-					self.itemComponent.render(self.tabs.getTabHtmlId('item'));
+					for (var idx in self.childComponents) {
+						var name = self.childComponents[idx].name;
+						self.childComponents[idx].clearCache();
+						self.childComponents[idx].setRecords(self.model.get('list'+name));
+						self.childComponents[idx].render(self.tabs.getTabHtmlId(name));
+					}
 					$('#'+self.tabsElement).show();
 				},
 				error: function (error) {
