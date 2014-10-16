@@ -149,19 +149,6 @@ define(['controller/tabController', 'component/cartComponent', 'component/itemCo
 				});
 			}
 		},
-		addItems: function (params) {
-			var list = this.itemComponent.getRecords();
-			for (var idx in params) {
-				var productId = params[idx].productId;
-				var model = _.findWhere(list,{productId: productId});
-				if (model) {
-					model.quantity++;
-					this.itemComponent.updateRecord(model);
-				} else {
-					this.itemComponent.addRecords({productId: productId, quantity: 1}); 
-				}
-			}
-		},
 		getChilds: function(name){
 			for (var idx in this.childComponents) {
 				if (this.childComponents[idx].name === name) {
